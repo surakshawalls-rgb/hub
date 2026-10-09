@@ -1,0 +1,266 @@
+<div class="hub-shell">
+  <aside class="sidebar" [class.sidebar-open]="mobileMenuOpen" aria-label="Main navigation">
+    <a class="brand" href="/" (click)="$event.preventDefault(); showHome()" aria-label="Suraksha Hub home">
+      <span class="brand-mark">S</span>
+      <span class="brand-copy"><strong>suraksha</strong><small>HUB</small></span>
+    </a>
+
+    <div class="nav-label">WORKSPACE</div>
+    <nav class="primary-nav" aria-label="Workspace">
+      <button class="nav-item" [class.active]="view === 'home'" (click)="showHome()">
+        <span class="nav-icon" aria-hidden="true">⌂</span><span>Home</span>
+      </button>
+      <button class="nav-item" [class.active]="view === 'applications' && !selectedCategory" (click)="showApplications()">
+        <span class="nav-icon apps-icon" aria-hidden="true">▦</span><span>All applications</span>
+        <span class="nav-count">{{ applications.length }}</span>
+      </button>
+      <button class="nav-item" [class.active]="view === 'favorites'" (click)="showFavorites()">
+        <span class="nav-icon" aria-hidden="true">☆</span><span>Favourites</span>
+        <span class="nav-count">{{ favoriteApplications.length }}</span>
+      </button>
+    </nav>
+
+    <div class="nav-label category-label">CATEGORIES</div>
+    <nav class="category-nav" aria-label="Application categories">
+      <button *ngFor="let category of categories" class="nav-item category-item"
+        [class.active]="selectedCategory === category" (click)="showCategory(category)">
+        <span class="category-dot" [attr.data-category]="category"></span>
+        <span>{{ category }}</span>
+        <span class="nav-count">{{ categoryCount(category) }}</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <button class="nav-item" [class.active]="view === 'about'" (click)="showAbout()">
+        <span class="nav-icon about-icon" aria-hidden="true">i</span><span>About Suraksha Hub</span>
+      </button>
+      <div class="sidebar-note">
+        <span class="online-dot"></span>
+        <span><strong>Suraksha ecosystem</strong><small>{{ applications.length }} connected destinations</small></span>
+      </div>
+      <div class="sidebar-version">A connected ecosystem <span>·</span> v1.0</div>
+    </div>
+  </aside>
+
+  <div class="mobile-scrim" *ngIf="mobileMenuOpen" (click)="mobileMenuOpen = false"></div>
+
+  <main class="main-area">
+    <header class="topbar" *ngIf="!activeDestination">
+      <button class="mobile-menu-button" type="button" (click)="mobileMenuOpen = !mobileMenuOpen"
+        [attr.aria-expanded]="mobileMenuOpen" aria-label="Toggle navigation menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="breadcrumb"><span>Suraksha Hub</span><span class="breadcrumb-slash">/</span><strong>{{ pageTitle }}</strong></div>
+      <div class="topbar-actions">
+        <span class="secure-label"><span class="online-dot"></span>Hub ready</span>
+        <span class="topbar-monogram" aria-label="Suraksha Group">S</span>
+      </div>
+    </header>
+
+    <div class="page-content" *ngIf="!activeDestination">
+      <div class="feedback-banner" *ngIf="message" role="alert">
+        <span>{{ message }}</span>
+        <button type="button" (click)="clearMessage()" aria-label="Dismiss message">×</button>
+      </div>
+
+      <ng-container *ngIf="view === 'home'">
+        <section class="welcome-panel">
+          <div class="welcome-copy">
+            <div class="eyebrow"><span class="eyebrow-line"></span>YOUR DIGITAL WORKSPACE</div>
+            <h1>Welcome to<br><em>Suraksha Hub.</em></h1>
+            <p>One considered place for the tools, businesses and digital services that move your work forward.</p>
+            <label class="search-box welcome-search">
+              <span class="search-symbol" aria-hidden="true"></span>
+              <input type="search" [(ngModel)]="searchQuery" placeholder="Search applications, tools..." aria-label="Search applications" />
+              <kbd>⌘ K</kbd>
+            </label>
+          </div>
+          <div class="welcome-art" aria-hidden="true">
+            <div class="art-ring ring-outer"></div><div class="art-ring ring-inner"></div>
+            <div class="art-center"><span>S</span><small>CONNECTED</small></div>
+            <span class="orbit-node node-a">T</span><span class="orbit-node node-b">W</span>
+            <span class="orbit-node node-c">L</span><span class="orbit-node node-d">D</span>
+            <span class="art-coordinate">25° 25' N<br>82° 34' E</span>
+          </div>
+          <div class="welcome-foot"><span>YOUR ECOSYSTEM, IN ONE PLACE</span><span>EST. 2025</span></div>
+        </section>
+
+        <section class="section-block" *ngIf="!searchQuery && frequentApplications.length">
+          <div class="section-heading">
+            <div><span class="section-kicker">QUICK ACCESS</span><h2>Frequently used</h2></div>
+            <button class="quiet-link" type="button" (click)="showApplications()">All applications <span aria-hidden="true">→</span></button>
+          </div>
+          <div class="quick-grid">
+            <a class="quick-card" *ngFor="let application of frequentApplications" [href]="'?app=' + application.slug"
+              (click)="launch(application, $event)">
+              <span class="app-mark" [attr.data-mark]="application.icon">{{ application.name.slice(0, 1) }}</span>
+              <span class="quick-copy"><strong>{{ application.name }}</strong><small>{{ application.category }}</small></span>
+              <span class="quick-arrow" aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </section>
+
+        <section class="section-block" *ngIf="favoriteApplications.length && !searchQuery">
+          <div class="section-heading">
+            <div><span class="section-kicker">YOUR SHORTLIST</span><h2>Favourites</h2></div>
+            <button class="quiet-link" type="button" (click)="showFavorites()">View favourites <span aria-hidden="true">→</span></button>
+          </div>
+          <div class="application-grid compact-grid">
+            <ng-container *ngFor="let application of favoriteApplications">
+              <article class="application-card">
+                <a class="card-main-link" [href]="'?app=' + application.slug"
+                  (click)="launch(application, $event)">
+                  <div class="card-top"><span class="app-mark" [attr.data-mark]="application.icon">{{ application.name.slice(0, 1) }}</span><span class="status-pill"><i></i>Live</span></div>
+                  <span class="app-category">{{ application.category }}</span><strong class="app-name">{{ application.name }}</strong>
+                  <span class="app-description">{{ application.description }}</span>
+                  <span class="card-launch">{{ openingId === application.id ? 'Opening…' : 'Open application' }} <span aria-hidden="true">↗</span></span>
+                </a>
+                <button class="favorite-button is-favorite" type="button" (click)="toggleFavorite(application, $event)" [attr.aria-label]="'Remove ' + application.name + ' from favourites'">★</button>
+              </article>
+            </ng-container>
+          </div>
+        </section>
+
+        <section class="section-block" *ngIf="recentApplications.length && !searchQuery">
+          <div class="section-heading">
+            <div><span class="section-kicker">PICK UP WHERE YOU LEFT OFF</span><h2>Recently opened</h2></div>
+          </div>
+          <div class="recent-list">
+            <a class="recent-row" *ngFor="let application of recentApplications" [href]="'?app=' + application.slug"
+              (click)="launch(application, $event)">
+              <span class="app-mark small-mark" [attr.data-mark]="application.icon">{{ application.name.slice(0, 1) }}</span>
+              <span class="recent-copy"><strong>{{ application.name }}</strong><small>{{ application.category }}</small></span>
+              <span class="recent-open">Open <span aria-hidden="true">↗</span></span>
+            </a>
+          </div>
+        </section>
+
+        <section class="section-block directory-section">
+          <div class="section-heading">
+            <div><span class="section-kicker">{{ searchQuery ? 'SEARCH RESULTS' : 'THE DIRECTORY' }}</span><h2>{{ searchQuery ? 'Matching applications' : 'All applications' }} <span class="heading-count">{{ visibleApplications.length }}</span></h2></div>
+            <button class="quiet-link" *ngIf="!searchQuery" type="button" (click)="showApplications()">Browse directory <span aria-hidden="true">→</span></button>
+          </div>
+          <div class="category-chips" *ngIf="!searchQuery">
+            <button type="button" class="category-chip" [class.chip-active]="selectedCategory === null" (click)="selectedCategory = null">All</button>
+            <button type="button" class="category-chip" *ngFor="let category of categories" (click)="showCategory(category)">{{ category }}</button>
+          </div>
+          <div class="application-grid">
+            <ng-container *ngFor="let application of visibleApplications">
+              <article class="application-card">
+                <a class="card-main-link" [href]="'?app=' + application.slug"
+                  (click)="launch(application, $event)">
+                  <div class="card-top"><span class="app-mark" [attr.data-mark]="application.icon">{{ application.name.slice(0, 1) }}</span><span class="status-pill"><i></i>Live</span></div>
+                  <span class="app-category">{{ application.category }}</span>
+                  <strong class="app-name">{{ application.name }}</strong>
+                  <span class="app-description">{{ application.description }}</span>
+                  <span class="card-launch">{{ openingId === application.id ? 'Opening…' : 'Open application' }} <span aria-hidden="true">↗</span></span>
+                </a>
+                <button class="favorite-button" [class.is-favorite]="favorites.has(application.id)" type="button"
+                  (click)="toggleFavorite(application, $event)"
+                  [attr.aria-label]="(favorites.has(application.id) ? 'Remove ' : 'Add ') + application.name + (favorites.has(application.id) ? ' from' : ' to') + ' favourites'">
+                  {{ favorites.has(application.id) ? '★' : '☆' }}
+                </button>
+              </article>
+            </ng-container>
+          </div>
+          <div class="empty-state" *ngIf="visibleApplications.length === 0">
+            <span class="empty-mark" aria-hidden="true">⌕</span>
+            <h3>No applications found</h3>
+            <p>Try a different search or browse all applications.</p>
+            <button class="text-button" type="button" (click)="searchQuery = ''; showApplications()">Clear search</button>
+          </div>
+        </section>
+
+        <footer class="page-footer"><span>© 2026 Suraksha Hub</span><span>One hub. All businesses. All applications.</span></footer>
+      </ng-container>
+
+      <ng-container *ngIf="view === 'applications' || view === 'favorites'">
+        <section class="directory-header">
+          <div><span class="section-kicker">SURAKSHA ECOSYSTEM</span><h1>{{ pageTitle }}</h1><p>Find the destination you need and open it inside Suraksha Hub.</p></div>
+          <label class="search-box directory-search"><span class="search-symbol" aria-hidden="true"></span><input type="search" [(ngModel)]="searchQuery" placeholder="Search applications..." aria-label="Search applications" /></label>
+        </section>
+        <div class="category-chips directory-chips" *ngIf="view === 'applications'">
+          <button type="button" class="category-chip" [class.chip-active]="selectedCategory === null" (click)="selectedCategory = null">All</button>
+          <button type="button" class="category-chip" *ngFor="let category of categories" [class.chip-active]="selectedCategory === category" (click)="showCategory(category)">{{ category }}</button>
+        </div>
+        <section class="directory-results">
+          <div class="results-label">{{ visibleApplications.length }} {{ visibleApplications.length === 1 ? 'APPLICATION' : 'APPLICATIONS' }}</div>
+          <div class="application-grid">
+            <ng-container *ngFor="let application of visibleApplications">
+              <article class="application-card">
+                <a class="card-main-link" [href]="'?app=' + application.slug"
+                  (click)="launch(application, $event)">
+                  <div class="card-top"><span class="app-mark" [attr.data-mark]="application.icon">{{ application.name.slice(0, 1) }}</span><span class="status-pill"><i></i>Live</span></div>
+                  <span class="app-category">{{ application.category }}</span>
+                  <strong class="app-name">{{ application.name }}</strong>
+                  <span class="app-description">{{ application.description }}</span>
+                  <span class="card-launch">{{ openingId === application.id ? 'Opening…' : 'Open application' }} <span aria-hidden="true">↗</span></span>
+                </a>
+                <button class="favorite-button" [class.is-favorite]="favorites.has(application.id)" type="button" (click)="toggleFavorite(application, $event)" [attr.aria-label]="(favorites.has(application.id) ? 'Remove ' : 'Add ') + application.name + (favorites.has(application.id) ? ' from' : ' to') + ' favourites'">{{ favorites.has(application.id) ? '★' : '☆' }}</button>
+              </article>
+            </ng-container>
+          </div>
+          <div class="empty-state" *ngIf="visibleApplications.length === 0">
+            <span class="empty-mark" aria-hidden="true">⌕</span><h3>{{ view === 'favorites' ? 'No favourites yet' : 'No applications found' }}</h3>
+            <p>{{ view === 'favorites' ? 'Mark applications with a star to keep them close at hand.' : 'Try a different search or category.' }}</p>
+            <button class="text-button" *ngIf="view === 'favorites'" type="button" (click)="showApplications()">Explore applications</button>
+          </div>
+        </section>
+        <footer class="page-footer"><span>© 2026 Suraksha Hub</span><span>One hub. All businesses. All applications.</span></footer>
+      </ng-container>
+
+      <ng-container *ngIf="view === 'about'">
+        <section class="about-hero">
+          <span class="section-kicker">A MORE CONNECTED WAY TO WORK</span>
+          <h1>One Hub.<br><em>Many possibilities.</em></h1>
+          <p>One considered starting point for a growing digital ecosystem.</p>
+          <span class="about-watermark" aria-hidden="true">S</span>
+        </section>
+        <section class="about-content">
+          <article class="about-intro"><span class="section-kicker">ABOUT SURAKSHA HUB</span><h2>Everything connected.<br>Nothing in the way.</h2><p>Suraksha Hub is a centralized digital platform created to connect the growing ecosystem of Suraksha Group businesses, websites and applications.</p><p>It simplifies access to business tools, productivity applications, digital services and online platforms through one organized interface.</p><p>By bringing multiple applications together, Suraksha Hub improves convenience, accessibility and navigation while providing a scalable foundation for future businesses and digital products.</p></article>
+          <div class="about-pillars"><article><span class="pillar-number">01</span><span class="section-kicker">OUR VISION</span><h3>A connected digital ecosystem.</h3><p>To create one connected digital ecosystem where every business, application and service can be accessed seamlessly from a single platform.</p></article><article><span class="pillar-number">02</span><span class="section-kicker">OUR MISSION</span><h3>Make access feel effortless.</h3><p>To simplify digital operations, improve accessibility and build a unified gateway for the expanding Suraksha Group ecosystem.</p></article></div>
+        </section>
+        <section class="about-bottom"><span class="about-bottom-mark">S</span><div><span class="section-kicker">BUILT TO GROW</span><h2>More ventures. One familiar place.</h2><p>The application directory is designed to grow with the ecosystem. New destinations can be added through the central directory configuration.</p></div><button class="button-primary" type="button" (click)="showApplications()">Explore applications <span aria-hidden="true">→</span></button></section>
+        <footer class="page-footer"><span>© 2026 Suraksha Hub</span><span>One hub. All businesses. All applications.</span></footer>
+      </ng-container>
+    </div>
+
+    <section class="destination-view" *ngIf="activeDestination as destination">
+      <div class="destination-feedback" *ngIf="message" role="alert">
+        <span>{{ message }}</span>
+        <button type="button" (click)="clearMessage()" aria-label="Dismiss message">×</button>
+      </div>
+      <header class="destination-toolbar">
+        <button class="return-button" type="button" (click)="returnToHub()">
+          <span aria-hidden="true">←</span> Back to Suraksha Hub
+        </button>
+        <div class="destination-heading">
+          <span class="app-mark small-mark" [attr.data-mark]="destination.icon">{{ destination.name.slice(0, 1) }}</span>
+          <div><strong>{{ destination.name }}</strong><small>{{ destination.category }}</small></div>
+        </div>
+        <div class="destination-actions">
+          <button class="destination-icon-button" type="button" (click)="reloadDestination(destinationFrame)" aria-label="Reload application">↻</button>
+          <button class="open-browser-button" type="button" (click)="openDestinationInBrowser()">
+            Open in browser <span aria-hidden="true">↗</span>
+          </button>
+        </div>
+      </header>
+      <div class="destination-notice">
+        <span class="notice-icon" aria-hidden="true">i</span>
+        <span>If this site appears blank or asks you to sign in, it may restrict in-app viewing. Use <strong>Open in browser</strong> for full compatibility.</span>
+      </div>
+      <div class="destination-frame-wrap" [attr.aria-busy]="destinationLoading">
+        <div class="destination-loading" *ngIf="destinationLoading" role="status">
+          <span class="loading-spinner" aria-hidden="true"></span>
+          <strong>Opening {{ destination.name }}</strong>
+          <small>Connecting to the application…</small>
+        </div>
+        <iframe #destinationFrame class="destination-frame" [src]="activeDestinationUrl"
+          [title]="destination.name + ' application'"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allow="clipboard-read; clipboard-write; fullscreen; geolocation; microphone; camera; payment"
+          allowfullscreen (load)="onDestinationLoad()"></iframe>
+      </div>
+    </section>
+  </main>
+</div>
