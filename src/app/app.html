@@ -45,7 +45,7 @@
   <div class="mobile-scrim" *ngIf="mobileMenuOpen" (click)="mobileMenuOpen = false"></div>
 
   <main class="main-area">
-    <header class="topbar" *ngIf="!activeDestination">
+    <header class="topbar">
       <button class="mobile-menu-button" type="button" (click)="mobileMenuOpen = !mobileMenuOpen"
         [attr.aria-expanded]="mobileMenuOpen" aria-label="Toggle navigation menu">
         <span></span><span></span><span></span>
@@ -57,7 +57,7 @@
       </div>
     </header>
 
-    <div class="page-content" *ngIf="!activeDestination">
+    <div class="page-content">
       <div class="feedback-banner" *ngIf="message" role="alert">
         <span>{{ message }}</span>
         <button type="button" (click)="clearMessage()" aria-label="Dismiss message">×</button>
@@ -113,7 +113,7 @@
                   <div class="card-top"><span class="app-mark" [attr.data-mark]="application.icon">{{ application.name.slice(0, 1) }}</span><span class="status-pill"><i></i>Live</span></div>
                   <span class="app-category">{{ application.category }}</span><strong class="app-name">{{ application.name }}</strong>
                   <span class="app-description">{{ application.description }}</span>
-                  <span class="card-launch">{{ openingId === application.id ? 'Opening…' : 'Open application' }} <span aria-hidden="true">↗</span></span>
+                  <span class="card-launch">Open application <span aria-hidden="true">↗</span></span>
                 </a>
                 <button class="favorite-button is-favorite" type="button" (click)="toggleFavorite(application, $event)" [attr.aria-label]="'Remove ' + application.name + ' from favourites'">★</button>
               </article>
@@ -153,7 +153,7 @@
                   <span class="app-category">{{ application.category }}</span>
                   <strong class="app-name">{{ application.name }}</strong>
                   <span class="app-description">{{ application.description }}</span>
-                  <span class="card-launch">{{ openingId === application.id ? 'Opening…' : 'Open application' }} <span aria-hidden="true">↗</span></span>
+                  <span class="card-launch">Open application <span aria-hidden="true">↗</span></span>
                 </a>
                 <button class="favorite-button" [class.is-favorite]="favorites.has(application.id)" type="button"
                   (click)="toggleFavorite(application, $event)"
@@ -194,7 +194,7 @@
                   <span class="app-category">{{ application.category }}</span>
                   <strong class="app-name">{{ application.name }}</strong>
                   <span class="app-description">{{ application.description }}</span>
-                  <span class="card-launch">{{ openingId === application.id ? 'Opening…' : 'Open application' }} <span aria-hidden="true">↗</span></span>
+                  <span class="card-launch">Open application <span aria-hidden="true">↗</span></span>
                 </a>
                 <button class="favorite-button" [class.is-favorite]="favorites.has(application.id)" type="button" (click)="toggleFavorite(application, $event)" [attr.aria-label]="(favorites.has(application.id) ? 'Remove ' : 'Add ') + application.name + (favorites.has(application.id) ? ' from' : ' to') + ' favourites'">{{ favorites.has(application.id) ? '★' : '☆' }}</button>
               </article>
@@ -225,42 +225,5 @@
       </ng-container>
     </div>
 
-    <section class="destination-view" *ngIf="activeDestination as destination">
-      <div class="destination-feedback" *ngIf="message" role="alert">
-        <span>{{ message }}</span>
-        <button type="button" (click)="clearMessage()" aria-label="Dismiss message">×</button>
-      </div>
-      <header class="destination-toolbar">
-        <button class="return-button" type="button" (click)="returnToHub()">
-          <span aria-hidden="true">←</span> Back to Suraksha Hub
-        </button>
-        <div class="destination-heading">
-          <span class="app-mark small-mark" [attr.data-mark]="destination.icon">{{ destination.name.slice(0, 1) }}</span>
-          <div><strong>{{ destination.name }}</strong><small>{{ destination.category }}</small></div>
-        </div>
-        <div class="destination-actions">
-          <button class="destination-icon-button" type="button" (click)="reloadDestination(destinationFrame)" aria-label="Reload application">↻</button>
-          <button class="open-browser-button" type="button" (click)="openDestinationInBrowser()">
-            Open in browser <span aria-hidden="true">↗</span>
-          </button>
-        </div>
-      </header>
-      <div class="destination-notice">
-        <span class="notice-icon" aria-hidden="true">i</span>
-        <span>If this site appears blank or asks you to sign in, it may restrict in-app viewing. Use <strong>Open in browser</strong> for full compatibility.</span>
-      </div>
-      <div class="destination-frame-wrap" [attr.aria-busy]="destinationLoading">
-        <div class="destination-loading" *ngIf="destinationLoading" role="status">
-          <span class="loading-spinner" aria-hidden="true"></span>
-          <strong>Opening {{ destination.name }}</strong>
-          <small>Connecting to the application…</small>
-        </div>
-        <iframe #destinationFrame class="destination-frame" [src]="activeDestinationUrl"
-          [title]="destination.name + ' application'"
-          referrerpolicy="strict-origin-when-cross-origin"
-          allow="clipboard-read; clipboard-write; fullscreen; geolocation; microphone; camera; payment"
-          allowfullscreen (load)="onDestinationLoad()"></iframe>
-      </div>
-    </section>
   </main>
 </div>

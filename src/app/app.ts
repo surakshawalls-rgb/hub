@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Capacitor } from '@capacitor/core';
 import { App as CapacitorApp } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
@@ -34,22 +33,11 @@ export class App implements OnInit, OnDestroy {
   mobileMenuOpen = false;
   favorites = new Set<string>();
   recentIds: string[] = [];
-  openingId: string | null = null;
-  activeDestination: HubApplication | null = null;
-  destinationLoading = false;
   message = '';
   private backButtonListener?: PluginListenerHandle;
-  private destinationLoadTimeout?: ReturnType<typeof setTimeout>;
-  private readonly handlePopState = (): void => {
-    this.restoreDestinationFromUrl();
-  };
-
-  constructor(private readonly sanitizer: DomSanitizer) {}
 
   ngOnInit(): void {
     this.restorePreferences();
-    window.addEventListener('popstate', this.handlePopState);
-    this.restoreDestinationFromUrl();
     if (Capacitor.isNativePlatform()) {
       void this.registerAndroidBackButton();
     }
@@ -57,13 +45,6 @@ export class App implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     void this.backButtonListener?.remove();
-    window.removeEventListener('popstate', this.handlePopState);
-    this.clearDestinationLoadTimeout();
-  }
-
-  get activeDestinationUrl(): SafeResourceUrl | null {
-    if (!this.activeDestination || !isSafeDestination(this.activeDestination.url)) return null;
-    return this.sanitizer.bypassSecurityTrustResourceUrl(this.activeDestination.url);
   }
 
   get visibleApplications(): HubApplication[] {
@@ -166,64 +147,22 @@ export class App implements OnInit, OnDestroy {
     }
 
     this.rememberRecent(application.id);
-    this.activeDestination = application;
-    this.destinationLoading = true;
-    this.openingId = application.id;
     this.message = '';
-    const destinationUrl = new URL(window.location.href);
-    destinationUrl.searchParams.set('app', application.slug);
-    window.history.pushState(
-      { hubDestination: application.id },
-      '',
-      destinationUrl
-    );
-    this.watchDestinationLoad();
-    this.openingId = null;
+
+    try {
+      if (Capacitor.isNativePlatform()) {
+        await Browser.open({ url: application.url });
+        return;
+      }
+      window.location.assign(application.url);
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : 'The browser could not open the link.';
+      this.message = `Could not open ${application.name}. ${detail}`;
+    }
   }
 
   isSafeApplication(application: HubApplication): boolean {
     return isSafeDestination(application.url);
-  }
-
-  onDestinationLoad(): void {
-    this.destinationLoading = false;
-    this.clearDestinationLoadTimeout();
-  }
-
-  returnToHub(): void {
-    if (
-      this.activeDestination &&
-      window.history.state?.hubDestination === this.activeDestination.id
-    ) {
-      window.history.back();
-      return;
-    }
-    this.closeDestination();
-  }
-
-  async openDestinationInBrowser(): Promise<void> {
-    const destination = this.activeDestination;
-    if (!destination || !this.isSafeApplication(destination)) {
-      this.message = 'This destination is not a valid HTTPS address.';
-      return;
-    }
-
-    try {
-      if (Capacitor.isNativePlatform()) {
-        await Browser.open({ url: destination.url });
-        return;
-      }
-      window.open(destination.url, '_blank', 'noopener,noreferrer');
-    } catch (error) {
-      const detail = error instanceof Error ? error.message : 'The browser could not open the link.';
-      this.message = `Could not open ${destination.name} in the browser. ${detail}`;
-    }
-  }
-
-  reloadDestination(frame: HTMLIFrameElement): void {
-    this.destinationLoading = true;
-    this.watchDestinationLoad();
-    frame.src = frame.src;
   }
 
   clearMessage(): void {
@@ -274,8 +213,6 @@ export class App implements OnInit, OnDestroy {
       this.backButtonListener = await CapacitorApp.addListener('backButton', () => {
         if (this.mobileMenuOpen) {
           this.mobileMenuOpen = false;
-        } else if (this.activeDestination) {
-          this.closeDestination();
         } else if (this.view !== 'home' || this.selectedCategory !== null) {
           this.showHome();
         } else {
@@ -288,45 +225,4 @@ export class App implements OnInit, OnDestroy {
     }
   }
 
-  private restoreDestinationFromUrl(): void {
-    const slug = new URLSearchParams(window.location.search).get('app');
-    const application = this.applications.find((entry) => entry.slug === slug);
-    if (!application || !this.isSafeApplication(application)) {
-      this.activeDestination = null;
-      this.destinationLoading = false;
-      this.clearDestinationLoadTimeout();
-      return;
-    }
-
-    this.activeDestination = application;
-    this.destinationLoading = true;
-    this.rememberRecent(application.id);
-    this.watchDestinationLoad();
-  }
-
-  private closeDestination(): void {
-    this.clearDestinationLoadTimeout();
-    this.destinationLoading = false;
-    this.activeDestination = null;
-    this.message = '';
-    const hubUrl = new URL(window.location.href);
-    hubUrl.searchParams.delete('app');
-    window.history.replaceState({ hubView: 'home' }, '', hubUrl);
-  }
-
-  private watchDestinationLoad(): void {
-    this.clearDestinationLoadTimeout();
-    this.destinationLoadTimeout = setTimeout(() => {
-      this.destinationLoading = false;
-      this.message =
-        'This destination is taking a while to display. It may restrict in-app viewing; try opening it in your browser.';
-    }, 15000);
-  }
-
-  private clearDestinationLoadTimeout(): void {
-    if (this.destinationLoadTimeout) {
-      clearTimeout(this.destinationLoadTimeout);
-      this.destinationLoadTimeout = undefined;
-    }
-  }
 }
