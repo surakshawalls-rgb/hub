@@ -22,7 +22,7 @@ describe('Suraksha Hub application directory', () => {
   it('assigns every application to a supported category and opening mode', () => {
     for (const application of APPLICATIONS) {
       expect(APPLICATION_CATEGORIES).toContain(application.category);
-      expect(application.openingMode).toBe('same-tab');
+      expect(application.openingMode).toBe('system-browser');
       expect(application.status).toBe('live');
     }
   });

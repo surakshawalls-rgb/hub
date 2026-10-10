@@ -37,7 +37,7 @@ const applicationEntries: HubApplication[] = [
     icon: 'tool',
     displayOrder: 1,
     status: 'live',
-    openingMode: 'same-tab'
+    openingMode: 'system-browser'
   },
   {
     id: 'worklog',
@@ -49,7 +49,7 @@ const applicationEntries: HubApplication[] = [
     icon: 'work',
     displayOrder: 2,
     status: 'live',
-    openingMode: 'same-tab'
+    openingMode: 'system-browser'
   },
   {
     id: 'soft-steps-carpets',
@@ -61,7 +61,7 @@ const applicationEntries: HubApplication[] = [
     icon: 'carpet',
     displayOrder: 3,
     status: 'live',
-    openingMode: 'same-tab',
+    openingMode: 'system-browser',
     businessName: 'Soft Steps Carpets'
   },
   {
@@ -74,7 +74,7 @@ const applicationEntries: HubApplication[] = [
     icon: 'software',
     displayOrder: 4,
     status: 'live',
-    openingMode: 'same-tab',
+    openingMode: 'system-browser',
     businessName: 'Suraksha Group'
   },
   {
@@ -87,7 +87,7 @@ const applicationEntries: HubApplication[] = [
     icon: 'library',
     displayOrder: 5,
     status: 'live',
-    openingMode: 'same-tab',
+    openingMode: 'system-browser',
     businessName: 'Suraksha Group'
   },
   {
@@ -100,7 +100,7 @@ const applicationEntries: HubApplication[] = [
     icon: 'rural',
     displayOrder: 6,
     status: 'live',
-    openingMode: 'same-tab',
+    openingMode: 'system-browser',
     businessName: 'FARF'
   },
   {
@@ -113,7 +113,7 @@ const applicationEntries: HubApplication[] = [
     icon: 'qr',
     displayOrder: 7,
     status: 'live',
-    openingMode: 'same-tab'
+    openingMode: 'system-browser'
   },
   {
     id: 'dandaata',
@@ -125,7 +125,7 @@ const applicationEntries: HubApplication[] = [
     icon: 'dandaata',
     displayOrder: 8,
     status: 'live',
-    openingMode: 'same-tab'
+    openingMode: 'system-browser'
   }
 ];
 

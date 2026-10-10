@@ -91,7 +91,7 @@
             <button class="quiet-link" type="button" (click)="showApplications()">All applications <span aria-hidden="true">→</span></button>
           </div>
           <div class="quick-grid">
-            <a class="quick-card" *ngFor="let application of frequentApplications" [href]="'?app=' + application.slug"
+            <a class="quick-card" *ngFor="let application of frequentApplications" [href]="application.url"
               (click)="launch(application, $event)">
               <span class="app-mark" [attr.data-mark]="application.icon">{{ application.name.slice(0, 1) }}</span>
               <span class="quick-copy"><strong>{{ application.name }}</strong><small>{{ application.category }}</small></span>
@@ -108,7 +108,7 @@
           <div class="application-grid compact-grid">
             <ng-container *ngFor="let application of favoriteApplications">
               <article class="application-card">
-                <a class="card-main-link" [href]="'?app=' + application.slug"
+                <a class="card-main-link" [href]="application.url"
                   (click)="launch(application, $event)">
                   <div class="card-top"><span class="app-mark" [attr.data-mark]="application.icon">{{ application.name.slice(0, 1) }}</span><span class="status-pill"><i></i>Live</span></div>
                   <span class="app-category">{{ application.category }}</span><strong class="app-name">{{ application.name }}</strong>
@@ -126,7 +126,7 @@
             <div><span class="section-kicker">PICK UP WHERE YOU LEFT OFF</span><h2>Recently opened</h2></div>
           </div>
           <div class="recent-list">
-            <a class="recent-row" *ngFor="let application of recentApplications" [href]="'?app=' + application.slug"
+            <a class="recent-row" *ngFor="let application of recentApplications" [href]="application.url"
               (click)="launch(application, $event)">
               <span class="app-mark small-mark" [attr.data-mark]="application.icon">{{ application.name.slice(0, 1) }}</span>
               <span class="recent-copy"><strong>{{ application.name }}</strong><small>{{ application.category }}</small></span>
@@ -147,7 +147,7 @@
           <div class="application-grid">
             <ng-container *ngFor="let application of visibleApplications">
               <article class="application-card">
-                <a class="card-main-link" [href]="'?app=' + application.slug"
+                <a class="card-main-link" [href]="application.url"
                   (click)="launch(application, $event)">
                   <div class="card-top"><span class="app-mark" [attr.data-mark]="application.icon">{{ application.name.slice(0, 1) }}</span><span class="status-pill"><i></i>Live</span></div>
                   <span class="app-category">{{ application.category }}</span>
@@ -176,7 +176,7 @@
 
       <ng-container *ngIf="view === 'applications' || view === 'favorites'">
         <section class="directory-header">
-          <div><span class="section-kicker">SURAKSHA ECOSYSTEM</span><h1>{{ pageTitle }}</h1><p>Find the destination you need and open it inside Suraksha Hub.</p></div>
+          <div><span class="section-kicker">SURAKSHA ECOSYSTEM</span><h1>{{ pageTitle }}</h1><p>Find the destination you need and open it securely in your browser.</p></div>
           <label class="search-box directory-search"><span class="search-symbol" aria-hidden="true"></span><input type="search" [(ngModel)]="searchQuery" placeholder="Search applications..." aria-label="Search applications" /></label>
         </section>
         <div class="category-chips directory-chips" *ngIf="view === 'applications'">
@@ -188,7 +188,7 @@
           <div class="application-grid">
             <ng-container *ngFor="let application of visibleApplications">
               <article class="application-card">
-                <a class="card-main-link" [href]="'?app=' + application.slug"
+                <a class="card-main-link" [href]="application.url"
                   (click)="launch(application, $event)">
                   <div class="card-top"><span class="app-mark" [attr.data-mark]="application.icon">{{ application.name.slice(0, 1) }}</span><span class="status-pill"><i></i>Live</span></div>
                   <span class="app-category">{{ application.category }}</span>
